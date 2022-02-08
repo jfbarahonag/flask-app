@@ -1,10 +1,6 @@
-from time import sleep
-from flask import Flask, jsonify, request, Response
+from flask import jsonify, request, Response
 from users import users
 from utils import CustomFile
-
-import os
-from pathlib import Path
 
 def init(app):
     @app.route('/', methods=['GET'])
