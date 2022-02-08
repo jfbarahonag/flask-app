@@ -1,6 +1,7 @@
 from time import sleep
 from flask import Flask, jsonify, request, Response
 from users import users
+from utils import CustomFile
 
 import os
 from pathlib import Path
@@ -21,39 +22,35 @@ def init(app):
     @app.route('/loadfiles', methods=['POST'])
     def load_files():
         data = request.json
-        # TODO: Create a library
-        # Create .cfg & .dat files
         try:
-            cfg_filename = "test.ext1"
-            dat_filename = "test.ext2"
+            # Create .cfg & .dat files
+            user = data["user"]
+            cfg_filename = f"{user}_test.cfg"
+            dat_filename = f"{user}_test.dat"
+            cfg = CustomFile(cfg_filename)
+            dat = CustomFile(dat_filename)
             # .cfg
-            f = open(cfg_filename, "x") if os.path.isfile(cfg_filename) == False else open(cfg_filename, "w")
-            f.write(data["cfg"])
-            f.close()
+            if not cfg.exists():
+                cfg.create()
+            cfg.write(data["cfg"], overwrite=True)
             # .dat
-            f = open(dat_filename, "x") if os.path.isfile(dat_filename) == False else open(dat_filename, "w")
-            f.write(data["dat"])
-            f.close()
+            if not dat.exists():
+                dat.create()
+            dat.write(data["dat"], overwrite=True)
 
             # Process files
             # .cfg
-            sleep(1) # start simulation
-            f = open(cfg_filename, "r")
-            print(f.read())
-            f.close()
+            print("CFG: ", cfg.read())
             #.dat
-            f = open(dat_filename, "r")
-            print(f.read())
-            f.close()
-            sleep(1) # end simulation
+            print("DAT: ", dat.read())
 
             # Delete files
-            os.remove(cfg_filename)
-            os.remove(dat_filename)
-            # os.remove()
+            cfg.remove()
+            dat.remove()
 
             return Response(jsonify({
-                "status": "ok"
+                "status": "ok",
+                "message": "files created, processed and deleted"
             }).data, status=200, mimetype="application/json")
             
         except:
